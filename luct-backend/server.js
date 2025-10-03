@@ -4,10 +4,10 @@ const authRoutes = require("./routes/auth");
 const reportsRoutes = require("./routes/reports");
 const classesRoutes = require("./routes/classes");
 const coursesRoutes = require("./routes/courses");
-const ratingsRoutes = require("./routes/ratings"); // ✅ add
+const ratingsRoutes = require("./routes/ratings");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -18,7 +18,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/classes", classesRoutes);
 app.use("/api/courses", coursesRoutes);
-app.use("/api/ratings", ratingsRoutes); // ✅ register ratings
+app.use("/api/ratings", ratingsRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {

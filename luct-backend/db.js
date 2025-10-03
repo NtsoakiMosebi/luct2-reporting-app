@@ -1,10 +1,12 @@
-const mysql = require('mysql2/promise');
+const { Pool } = require("pg");
 
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '123456', //MySQL root password
-  database: 'luct_reporting',
+const pool = new Pool({
+  user: process.env.DB_USER || "postgres",
+  host: process.env.DB_HOST || "ouzbytnnkuzgdcthctpo.supabase.co",
+  database: process.env.DB_NAME || "postgres",
+  password: process.env.DB_PASSWORD || "123456",
+  port: process.env.DB_PORT || 5432,
+  ssl: { rejectUnauthorized: false }, // Supabase requires SSL
 });
 
 module.exports = pool;

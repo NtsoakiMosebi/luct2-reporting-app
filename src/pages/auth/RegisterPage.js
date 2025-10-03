@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/api";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -11,18 +10,16 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleRegister = (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    try {
-      const res = await api.post("/auth/register", { username, password, name, role });
-      setSuccess(res.data.message);
-      setTimeout(() => navigate("/login"), 1500);
-    } catch (err) {
-      setError(err.response?.data?.error || "Registration failed");
-    }
+    
+    alert("✅ Demo registration: backend not connected.");
+    
+    
+    navigate("/login");
   };
 
   return (
@@ -64,7 +61,9 @@ export default function RegisterPage() {
           <option value="prl">PRL</option>
           <option value="pl">PL</option>
         </select>
-        <button type="submit" className="btn btn-primary w-100">Register</button>
+        <button type="submit" className="btn btn-primary w-100">
+          Register
+        </button>
       </form>
     </div>
   );

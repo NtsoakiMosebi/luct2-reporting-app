@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/api";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -8,43 +7,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setError("");
 
-    try {
-      const res = await api.post("/auth/login", { username, password });
-
-      // Save token and user info
-      localStorage.setItem("token", res.data.token || "");
-      localStorage.setItem("role", res.data.user.role || "");
-      localStorage.setItem("name", res.data.user.name || "");
-      localStorage.setItem("faculty_id", res.data.user.faculty_id || "");
-      
-      // ✅ Save userId automatically for student pages
-      localStorage.setItem("userId", res.data.user.id || "");
-
-      // Redirect based on role
-      switch (res.data.user.role) {
-        case "student":
-          navigate("/student");
-          break;
-        case "lecturer":
-          navigate("/lecturer");
-          break;
-        case "prl":
-          navigate("/prl");
-          break;
-        case "pl":
-          navigate("/pl");
-          break;
-        default:
-          setError("Unknown role");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err.response?.data?.error || "Login failed");
-    }
+    // Demo version: no backend
+    alert("✅ Demo login: backend not connected. You can still navigate!");
+    
+    
+    navigate("/student"); // or /lecturer /prl /pl as needed
   };
 
   return (
@@ -68,7 +39,9 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit" className="btn btn-primary w-100">Login</button>
+        <button type="submit" className="btn btn-primary w-100">
+          Login
+        </button>
       </form>
     </div>
   );

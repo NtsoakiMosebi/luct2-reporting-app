@@ -7,9 +7,10 @@ const jwt = require("jsonwebtoken");
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "Missing token" });
+
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, "secretkey");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
     req.user = decoded;
     next();
   } catch (err) {
@@ -17,10 +18,11 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// Submit rating
+// ✅ Submit rating
 router.post("/:lectureId", authenticate, async (req, res) => {
   const { lectureId } = req.params;
   const { rating, comments } = req.body;
+
   if (!rating) return res.status(400).json({ error: "Rating is required" });
 
   try {
@@ -30,7 +32,7 @@ router.post("/:lectureId", authenticate, async (req, res) => {
       [req.user.id, lectureId, rating, comments || null]
     );
 
-    // Log rating
+    // ✅ Log rating in monitoring
     await pool.query(
       "INSERT INTO monitoring_logs (user_id, action, target) VALUES (?, ?, ?)",
       [req.user.id, "rated lecture", `lecture:${lectureId}`]
@@ -43,7 +45,7 @@ router.post("/:lectureId", authenticate, async (req, res) => {
   }
 });
 
-// Get ratings
+// ✅ Get all ratings for a lecture
 router.get("/:lectureId", authenticate, async (req, res) => {
   const { lectureId } = req.params;
   try {
@@ -59,6 +61,23 @@ router.get("/:lectureId", authenticate, async (req, res) => {
   } catch (err) {
     console.error("Fetch ratings error:", err);
     res.status(500).json({ error: "Failed to fetch ratings" });
+  }
+});
+
+// ✅ Get average rating
+router.get("/:lectureId/average", authenticate, async (req, res) => {
+  const { lectureId } = req.params;
+  try {
+    const [[avgRow]] = await pool.query(
+      `SELECT AVG(rating) AS avgRating, COUNT(*) AS totalRatings
+       FROM ratings
+       WHERE rated_entity = 'lecture' AND entity_id = ?`,
+      [lectureId]
+    );
+    res.json(avgRow || { avgRating: 0, totalRatings: 0 });
+  } catch (err) {
+    console.error("Fetch average rating error:", err);
+    res.status(500).json({ error: "Failed to fetch average rating" });
   }
 });
 

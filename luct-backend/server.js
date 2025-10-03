@@ -1,5 +1,8 @@
+require("dotenv").config(); // ✅ Load environment variables first
+
 const express = require("express");
 const cors = require("cors");
+
 const authRoutes = require("./routes/auth");
 const reportsRoutes = require("./routes/reports");
 const classesRoutes = require("./routes/classes");
@@ -7,7 +10,7 @@ const coursesRoutes = require("./routes/courses");
 const ratingsRoutes = require("./routes/ratings");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors()); // enable CORS for all origins

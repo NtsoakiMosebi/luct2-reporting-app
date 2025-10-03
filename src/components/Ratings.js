@@ -8,21 +8,27 @@ const Ratings = ({ lectureId, maxRating = 5 }) => {
   const [comments, setComments] = useState("");
   const [msg, setMsg] = useState("");
   const [existingRatings, setExistingRatings] = useState([]);
+  const [avgRating, setAvgRating] = useState(null);
 
+  // ✅ Decode user ID from token
   const userId = (() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = jwtDecode(token);
       return decoded.id || decoded.user_id;
     }
-    return localStorage.getItem("userId");
+    return null;
   })();
 
+  // Fetch ratings + average
   useEffect(() => {
     const fetchRatings = async () => {
       try {
         const res = await api.get(`/ratings/${lectureId}`);
         setExistingRatings(res.data.ratings || []);
+
+        const avgRes = await api.get(`/ratings/${lectureId}/average`);
+        setAvgRating(avgRes.data);
       } catch (err) {
         console.error("Fetch ratings error:", err);
       }
@@ -30,6 +36,7 @@ const Ratings = ({ lectureId, maxRating = 5 }) => {
     fetchRatings();
   }, [lectureId]);
 
+  // Submit rating
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userId) {
@@ -42,13 +49,18 @@ const Ratings = ({ lectureId, maxRating = 5 }) => {
     }
 
     try {
-      await api.post("/ratings", { userId, lectureId, rating, comments });
+      // ✅ Send to backend with lectureId
+      await api.post(`/ratings/${lectureId}`, { rating, comments });
       setMsg("Rating submitted successfully!");
       setComments("");
       setRating(0);
 
+      // Refresh ratings
       const res = await api.get(`/ratings/${lectureId}`);
       setExistingRatings(res.data.ratings || []);
+
+      const avgRes = await api.get(`/ratings/${lectureId}/average`);
+      setAvgRating(avgRes.data);
     } catch (err) {
       console.error("Submit rating error:", err);
       setMsg("Failed to submit rating");
@@ -59,6 +71,7 @@ const Ratings = ({ lectureId, maxRating = 5 }) => {
     <div className="ratings-component text-start">
       <h4>Rate this Lecture</h4>
       {msg && <div className="alert alert-info">{msg}</div>}
+
       <form onSubmit={handleSubmit}>
         <div className="mb-2">
           {[...Array(maxRating)].map((_, index) => {
@@ -93,6 +106,15 @@ const Ratings = ({ lectureId, maxRating = 5 }) => {
         <button className="btn btn-primary">Submit Rating</button>
       </form>
 
+      {/* ✅ Show average rating */}
+      {avgRating && (
+        <div className="mt-3">
+          <strong>Average Rating:</strong>{" "}
+          {avgRating.avgRating ? avgRating.avgRating.toFixed(1) : 0} ★ (
+          {avgRating.totalRatings} ratings)
+        </div>
+      )}
+
       <h5 className="mt-4">Previous Ratings</h5>
       {existingRatings.length === 0 && <p>No ratings yet.</p>}
       {existingRatings.map((r) => (
@@ -101,7 +123,9 @@ const Ratings = ({ lectureId, maxRating = 5 }) => {
             <strong>{r.student_name}</strong> rated: {r.rating} ★
           </p>
           {r.comments && <p>Comments: {r.comments}</p>}
-          <small className="text-muted">{new Date(r.created_at).toLocaleString()}</small>
+          <small className="text-muted">
+            {new Date(r.created_at).toLocaleString()}
+          </small>
         </div>
       ))}
     </div>

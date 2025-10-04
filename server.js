@@ -1,5 +1,8 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
+
 const authRoutes = require("./routes/auth");
 const reportsRoutes = require("./routes/reports");
 const classesRoutes = require("./routes/classes");
@@ -9,7 +12,6 @@ const ratingsRoutes = require("./routes/ratings");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -20,9 +22,8 @@ app.use("/api/classes", classesRoutes);
 app.use("/api/courses", coursesRoutes);
 app.use("/api/ratings", ratingsRoutes);
 
-// Root route for testing
 app.get("/", (req, res) => {
-  res.send("Backend running!");
+  res.send("✅ Backend running!");
 });
 
 app.listen(PORT, () => {
